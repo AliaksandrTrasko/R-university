@@ -1,0 +1,165 @@
+Wczytaj potrzebne pakiety
+
+```{r}
+library(stringr)
+library(readxl)
+library(dplyr)
+```
+
+Usuń wszystkie obiekty
+
+```{r}
+remove(list = ls())
+```
+
+
+Wytnij nazwę ulicy
+
+```{r}
+x <- c("ul. Winogrady", "ul. Wyzwolenia", "ul. Szymanowskiego", "ul. Małe Garbary")
+str_sub(x, start = 5, end = -1)
+
+```
+
+Sklej teksty, tak aby w wyniku otrzymać: "ul. Winogrady 10" ...
+
+```{r}
+x <- c("Winogrady", "Wyzwolenia", "Szymanowskiego", "Małe Garbary")
+y <- c(10, NA, 30, 40)
+```
+
+```{r}
+paste("ul.", x, y)
+```
+
+```{r}
+str_c("ul.", x, y, sep = " ")
+```
+
+Wyodrębnij domenę poczty z adresu e-mail.
+
+```{r}
+x <- c("abcd@gmail.com", "efg.hij@yahoo.com", "klmno@o2.pl", "pqrstuvwxyz@gmail.com")
+```
+
+```{r}
+str_split_i(x, pattern = "@", i = 2)
+```
+
+Usuń nadmiarowe spacje.
+
+```{r}
+x <- c(" Winogrady", "Wyzwolenia ", " Szymanowskiego ", "Małe Garbary")
+```
+
+```{r}
+str_trim(x)
+```
+
+```{r}
+x <- c(" Winogrady", "Wyzwolenia ", " Szymanowskiego ", "Małe  Garbary")
+```
+
+```{r}
+str_squish(x)
+```
+
+Posortuj teksty
+
+```{r}
+x <- c("9", "54", "876", "3210")
+```
+
+Uzupełnij zerami z przodu, tak aby wszystkie teksty miały długość 4.
+
+```{r}
+x <- c("9", "54", "876", "3210")
+```
+
+Zamień wielkie litery na małe.
+
+```{r}
+x <- c(" WINOGRADY", "Wyzwolenia ", " Szymanowskiego ", "Małe  Garbary")
+```
+
+Zamień "," na ".".
+
+```{r}
+x <- c("30,1", "40,4", "49,8", "60,3")
+```
+
+```{r}
+x <- c("800,000 PLN", "1,000,000 PLN", "1,200,000 PLN", "1,500,000 PLN")
+```
+
+Zamień "." na ",".
+
+```{r}
+x <- c("30.1", "40.4", "49.8", "60.3")
+```
+
+Wskaż, który tekst zawiera tekst "garaż".
+
+```{r}
+x <- c("Przytulna kawalerka 30mkw garaż Winogrady", "Kawalerka 40m2 Rataje BEZPOSREDNIO", "Mieszkanie dwupokojowe 50 mkw z garażem PIĄTKOWO", "Mieszkanie dwu-pokojowe 60 m2 Stare Miasto")
+```
+
+Wskaż, które teksty zawierają tekst "garaż" lub "parking".
+
+```{r}
+x <- c("Przytulna kawalerka 30mkw GARAŻ Winogrady", "Kawalerka 40m2 Rataje BEZPOSREDNIO", "Mieszkanie dwupokojowe 50 mkw z miejscem parkingowym PIĄTKOWO", "Mieszkanie dwu-pokojowe 60 m2 Stare Miasto")
+```
+
+Wyodrębnij powierzchnie mieszkania (dwucyfrowe ciągi znaków).
+
+```{r}
+x <- c("Przytulna kawalerka 30 mkw GARAŻ Winogrady", "Kawalerka Rataje BEZPOSREDNIO", "Mieszkanie dwupokojowe 50 mkw z miejscem parkingowym PIĄTKOWO", "Mieszkanie dwu-pokojowe 60 mkw Stare Miasto")
+```
+
+Wczytaj dane z pliku "rent-poznan.xlsx".
+
+```{r}
+
+```
+
+Znajdź ogłoszenia w których występuje słowo: "garaż", "parking" lub "postojowe".
+
+```{r}
+
+```
+
+Znajdź ogłoszenia w których znajduje się tekst z wektora x.
+
+```{r}
+x <- c("garaż", "garaz", "gararz", "parking", "postoj")
+```
+
+Wyodrębnij powierzchnie mieszkania jako tekst składający się od dwóch do trzech cyfr a następnie opcjonalnie spacja oraz skrót "m2" lub "mkw", np. "30m2", "40 m2", "50mkw", "50 mkw".
+
+```{r}
+
+```
+
+Uwzględnij we poprzednim zadaniu miejsca dziesiętne w liczbie.
+
+```{r}
+
+```
+
+W poprzednim zadaniu pozostaw tylko liczbę.
+
+```{r}
+
+```
+
+Znajdź ogłoszenia, w któych co najmniej dwukrotnie występuje liczba dwu/trzy-cyfrowa.
+
+```{r}
+
+```
+
+Znajdź ogłoszenia, w któych co najmniej dwukrotnie występuje ten sam ciąg kolejnych 8 znaków (liter lub cyfr).
+
+```{r}
+
+```
