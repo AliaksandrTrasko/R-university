@@ -1,0 +1,192 @@
+## Pakiety
+
+Wczytaj pakiety
+
+```{r}
+library(lubridate)
+library(readxl)
+library(dplyr)
+```
+
+## Tworzenie dat/dato-godzin
+
+Zamień tekst na datę
+
+```{r}
+x <- "2024.11.28"
+y <- "2024.11.28"
+z <- "28-11-2024"
+
+```
+
+```{r}
+class(x)
+class(y)
+class(z)
+```
+
+```{r}
+x_date <- as.Date(x, format = "%Y.%m.%d")
+y_date <- as.Date(y, format = "%Y.%m.%d")
+
+class(x_date)
+```
+
+```{r}
+as.numeric(x_date)/60/60/24/365
+```
+
+```{r}
+x_date <- as.POSIXct(x, format = "%Y.%m.%d")
+y_date <- as.POSIXct(y, format = "%Y.%m.%d")
+```
+
+```{r}
+ymd(x, tz = "CET")
+```
+
+Zamień tekst na dato-godzinę
+
+```{r}
+x <- "2024.11.28 16:45"
+y <- "28. Listopad 2024 16:45"
+
+```
+
+```{r}
+x_datetime <- ymd_hm(x, tz = "CET")
+y_datetime <- dmy_hm(y, tz = "CET")
+
+```
+
+Zamień tekst na dato-godzinę
+
+```{r}
+x <- c("28-11-2024, 16:45", "28 November 2024, 16:45", "28 listopad 2024, 16:45", "2024.11.28, 16:45", "11/28/2024, 16:45")
+
+lubridate::parse_date_time(x, order=c("dmyHM", "ymdHM", "mdyHM"))
+
+```
+
+Utwórz następującą datę: 2024.11.28.
+
+```{r}
+ymd("2024.11.28", tz="Europe/Warsaw")
+make_datetime(2024,11,28, tz="Europe/Warsaw")
+```
+
+Utwórz nastęującą datogodzinę: 2024.11.28, 16:45
+
+```{r}
+
+```
+
+## Wyciąganie składowych dato-godzin
+
+Jaki/a jest aktualnie rok, miesiąc, dzień, dzień w ciągu roku, tydzień, godzina, minuta, sekunda?
+
+```{r}
+x <- format(Sys.time(), "%d.%m.%Y %H:%M:%S")
+x <- lubridate::dmy_hms(x)
+```
+
+```{r}
+year(x)
+wday(x, week_start = 1)
+```
+
+## Zaokrąglanie dat
+
+Zaokrąglij aktualną dato-godzinę z dokładonością do godziny. Zaokrąglij w dół aktualną dato-godzinę z dokładnością do dnia. Zaokrąglij w górę aktualną dato-godzinę z dokładnością do miesiąca. Zaokrąglij w dół aktualną dato-godzinę dokładnością do 10 minut.
+
+```{r}
+round_date(x, unit ="hour")
+round_date(x, unit ="10 minute")
+```
+
+## Przesuwanie czasu
+
+Przesuń dato-godzinę x o 7 dni. Utwórz sekwencję 15 terminów w czwartki o 16:45 rozpoczynając od dato-godziny x.
+
+```{r}
+x <- ymd_hm("2024-10-04 16:45", tz = "CET")
+```
+
+```{r}
+x + days(7)
+```
+
+```{r}
+x + ddays(7)
+x + dmonths(1)
+```
+
+```{r}
+ddays(1)
+```
+
+## Przedziały czasowe
+
+Utwórz przedziały czasowe x-y, x-z, y-z. Sprawdź, czy x-y zawiera się w x-z. Sprawdź, czy x-y i y-z mają część wspólną.
+
+```{r}
+x <- ymd_hm("2024-10-21 16:45", tz = "CET")
+y <- ymd_hm("2024-11-18 16:45", tz = "CET")
+z <- ymd_hm("2024-11-25 16:45", tz = "CET")
+
+```
+
+```{r}
+xy <- interval(x,y)
+xz <- x %--% z
+yz <- y %--% z
+
+
+xy %within% xz
+int_overlaps(xy, yz)
+```
+
+## Czas/okres pomiędzy dato-godzinami
+
+Wyznacz czas trwania w miesiacach/dniach/godzinach pomiędzy dato-godzinami x i y.
+
+```{r}
+x <- ymd_hm("2020-01-02 16:45", tz = "CET")	
+y <- ymd_hm("2020-03-02 16:45", tz = "CET")
+```
+
+```{r}
+x %--% y / months(1)
+x %--% y / dmonths(1)
+
+x %--% y / days(1)
+x %--% y / ddays(1)
+
+x %--% y / hours(1)
+x %--% y / dhours(1)
+```
+
+```{r}
+x <- ymd_hm("2020-01-02 16:45", tz = "CET")	
+y <- ymd_hm("2020-04-02 16:45", tz = "CET")
+```
+
+## Zamiana stref czasowych
+
+Zamień strefę czasową w aktualnej dato-godzinie na strefe czasową Nowego Yorku. Jaka aktualniejest godzina w Nowym Yorku? Jaka jest różnica w dato-godzinach?
+
+```{r}
+
+```
+
+## Zbiór danych z ogłoszeniami wynajmu lokali
+
+Wczytaj dane z pliku "rent-poznan.csv". Zamień kolumny date_activ, date_modif, date_expire na daty.
+
+Zamień kolumny date_activ, date_modif, date_expire na daty.
+
+Ile pełnych miesięcy były aktywne ogłoszenia wystawione w 2019 roku.
+
+W jakie dni tygodnia w roku 2020 najczęściej wystawiano ogłoszenia?
+
+Znajdź ogłoszenia, które w 2019 roku: (a) zakończyły się, (b) zostały wystawione i zakończyły się, (c) były aktywne cały rok, (d) były aktywne chociaż jeden dzień.
