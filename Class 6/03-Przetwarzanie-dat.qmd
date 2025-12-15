@@ -1,0 +1,318 @@
+
+## Pakiety
+
+Wczytaj pakiety
+
+```{r}
+library(lubridate)
+library(readxl)
+library(dplyr)
+```
+
+## Tworzenie dat/dato-godzin
+
+Zamień tekst na datę
+
+```{r}
+x <- "2024.11.28"
+y <- "11/28/2024"
+z <- "28-11-2024"
+
+```
+
+```{r}
+class(x)
+class(y)
+class(z)
+```
+
+```{r}
+x_date <- as.POSIXct(x, format ="%Y.%m.%d")
+y_date <- as.POSIXct(y, format = "%m/%d/%Y")
+# z_date <- 
+
+x_date
+y_date
+# z_date
+```
+
+
+```{r}
+x_date <- ymd(x, tz = "CET")
+y_date <- mdy(y, tz = "CET")
+z_date <- dmy(z, tz = "CET")
+```
+
+
+```{r}
+class(x_date)
+class(y_date)
+class(z_date)
+```
+```{r}
+as.numeric(x_date)/60/60/24/365.25 # liczba lat od 1970-01-01 do 2024-11-28
+```
+
+
+Zamień tekst na dato-godzinę
+
+```{r}
+x <- "2024.11.28 16:45"
+y <- "28. Listopad 2024 16:45"
+```
+
+```{r}
+class(x)
+```
+
+```{r}
+x_datetime <- ymd_hm(x, tz = "CET")
+y_datetime <- dmy_hm(y, tz = "CET")
+```
+
+```{r}
+class(x_datetime)
+```
+
+
+Zamień tekst na dato-godzinę
+
+```{r}
+x <- c("28-11-2024, 16:45", "28 November 2024, 16:45", "28 listopad 2024, 16:45", "2024.11.28, 16:45", "11/28/2024, 16:45")
+```
+
+```{r}
+parse_date_time(x, order = c("dmyHM", "ymdHM", "mdyHM"))
+```
+
+
+Utwórz następującą datę: 2024.11.28.
+
+```{r}
+ymd("2024.11.28", tz = "Europe/Warsaw")
+make_datetime(2024, 11, 28, tz = "Europe/Warsaw")
+```
+
+Utwórz nastęującą datogodzinę: 2024.11.28, 16:45
+
+```{r}
+
+```
+
+## Wyciąganie składowych dato-godzin
+
+Jaki/a jest aktualnie rok, miesiąc, dzień, dzień w ciągu roku, tydzień, godzina, minuta, sekunda?
+
+```{r}
+x <- now()
+x
+```
+
+```{r}
+year(x)
+month(x)
+day(x)
+hour(x)
+minute(x)
+second(x)
+```
+
+```{r}
+wday(x, week_start = 1)
+wday(x, week_start = 1, label = TRUE, abbr = FALSE)
+week(x)
+yday(x)
+```
+
+
+## Zaokrąglanie dat
+
+Zaokrąglij aktualną dato-godzinę z dokładonością do godziny. 
+Zaokrąglij w dół aktualną dato-godzinę z dokładnością do dnia. 
+Zaokrąglij w górę aktualną dato-godzinę z dokładnością do miesiąca. 
+Zaokrąglij w dół aktualną dato-godzinę dokładnością do 10 minut.
+
+```{r}
+x <- now()
+x
+```
+
+```{r}
+round_date(x, unit = "hour")
+floor_date(x, unit = "day")
+ceiling_date(x, unit = "month")
+floor_date(x, unit = "10 minute")
+```
+
+
+## Przesuwanie czasu
+
+Przesuń dato-godzinę x o 7 dni. Utwórz sekwencję 15 terminów w czwartki o 16:45 rozpoczynając od dato-godziny x.
+
+```{r}
+x <- ymd_hm("2024-10-04 16:45", tz = "CET")
+x
+```
+
+
+```{r}
+x + days(7)
+x + months(2)
+x + years(1)
+```
+
+```{r}
+x + ddays(7)
+x + ddays(31)
+x + dmonths(1)
+```
+
+```{r}
+ddays(1)
+dweeks(1)
+
+
+dyears(1)
+365.25*24*60*60 # liczba sekund w przeciętnym roku
+
+dmonths(1)
+365.25*24*60*60/12 # liczba sekund w przeciętnym miesiącu
+
+```
+
+
+## Przedziały czasowe
+
+Utwórz przedziały czasowe x-y, x-z, y-z. Sprawdź, czy x-y zawiera się w x-z. Sprawdź, czy x-y i y-z mają część wspólną.
+
+```{r}
+x <- ymd_hm("2024-10-21 16:45", tz = "CET")
+y <- ymd_hm("2024-11-18 16:45", tz = "CET")
+z <- ymd_hm("2024-11-25 16:45", tz = "CET")
+```
+
+```{r}
+xy <- interval(x, y)
+xz <- x %--% z
+yz <- (y +1) %--% (z +1)
+yz
+```
+
+```{r}
+class(xy)
+```
+
+```{r}
+xy %within% xz
+int_overlaps(xy, yz)
+```
+
+
+## Czas/okres pomiędzy dato-godzinami
+
+Wyznacz czas trwania w miesiacach/dniach/godzinach pomiędzy dato-godzinami x i y.
+
+```{r}
+x <- ymd_hm("2020-01-02 16:45", tz = "CET")	
+y <- ymd_hm("2020-03-02 16:45", tz = "CET")
+```
+
+```{r}
+x %--% y / months(1)
+x %--% y / dmonths(1)
+
+x %--% y / days(1)
+x %--% y / ddays(1)
+
+x %--% y / hours(1)
+x %--% y / dhours(1)
+```
+
+
+```{r}
+x <- ymd_hm("2020-01-02 16:45", tz = "CET")	
+y <- ymd_hm("2020-04-02 16:45", tz = "CET")
+```
+
+
+```{r}
+x %--% y / months(1)
+x %--% y / dmonths(1)
+
+x %--% y / days(1)
+x %--% y / ddays(1)
+
+x %--% y / hours(1)
+x %--% y / dhours(1)
+```
+
+## Zamiana stref czasowych
+
+Zamień strefę czasową w aktualnej dato-godzinie na strefe czasową Nowego Yorku. Jaka aktualniejest godzina w Nowym Yorku? Jaka jest różnica w dato-godzinach?
+
+```{r}
+
+```
+
+## Zbiór danych z ogłoszeniami wynajmu lokali
+
+Wczytaj dane z pliku "rent-poznan.xlsx". 
+
+```{r}
+rent <- 
+  read_xlsx("dane-surowe/rent-poznan.xlsx")
+```
+
+Ile pełnych miesięcy były aktywne ogłoszenia wystawione w 2019 roku?
+
+```{r}
+#| echo: false
+rent |>
+  filter(date_activ >= ymd("2019-01-01"), date_activ < ymd("2019-12-31")) |>
+  mutate(full_months = date_activ %--% date_expire / months(1), .after = date_expire) |>
+  mutate(full_months = ceiling(full_months)) |>
+  count(full_months)
+```
+
+
+W jakie dni tygodnia w roku 2020 najczęściej wystawiano ogłoszenia?
+
+```{r}
+#| echo: false
+rent |>
+  filter(date_activ >= ymd("2020-01-01"), date_activ < ymd("2020-12-31")) |>
+  mutate(day_active = wday(date_activ, week_start = 1, label = TRUE, abbr = FALSE)) |>
+  count(day_active)
+```
+
+Znajdź ogłoszenia, które w 2019 roku:
+
+(a) zakończyły się
+```{r}
+#| echo: false
+rent |>
+  filter(date_expire >= ymd("2019-01-01"), date_expire < ymd("2019-12-31")) |>
+  nrow()
+```
+(b) zostały wystawione i zakończyły się,
+```{r}
+#| echo: false
+rent |>
+  filter((date_activ %--% date_expire)  %within%  (ymd("2019-01-01") %--% ymd("2019-12-31"))) |>
+  nrow()
+```
+(c) były aktywne cały rok
+```{r}
+#| echo: false
+rent |>
+  filter(date_activ <= ymd("2019-01-01"), date_expire >= ymd("2019-12-31")) |>
+  nrow()
+```
+(d) były aktywne chociaż jeden dzień.
+```{r}
+#| echo: false
+rent |>
+  filter(int_overlaps(date_activ %--% date_expire, ymd("2019-01-01") %--% ymd("2019-12-31"))) |>
+  nrow()
+```
+

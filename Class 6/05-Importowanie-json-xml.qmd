@@ -1,0 +1,108 @@
+
+```{r}
+library(jsonlite)
+library(xml2)
+library(purrr)
+library(tibble)
+library(tidyr)
+```
+
+
+Utwórz listę, która składa się z dwóch wektorów, macierzy, ramki danych i listy
+
+```{r}
+lista1 <-
+  list(
+    wektor1 = 1:10, 
+    wektor2 = c("a", "b", "c"), 
+    macierz = matrix(1:9, ncol = 3), 
+    ramka = data.frame(x1 = 1:3, x2 = c(TRUE, FALSE, TRUE)),
+    lista = list(100, c("a", "b"), c(TRUE, FALSE))
+  )
+```
+
+
+Wyodrębnij z listy drugi wektor
+
+```{r}
+lista1[[2]] # wektor2
+lista1[["wektor2"]]
+lista1$wektor2
+```
+
+```{r}
+lista1[2] # lista jednoelementowa
+lista1["wektor2"]
+```
+
+Wyodrębnij 2. element z z wektora logicznego, który z kolei jest 3. elementem listy, która jest 5. elementem listy1.
+
+```{r}
+lista1[[5]][[3]][2]
+```
+
+Utwórz listę z adresami, niech dla każdego adresu dana będzie lista z osobami mieszkającymi pod tym adresem.
+
+```{r}
+lista2 <-
+  list(
+    adres1 = list(
+      ulica = "Towarowa",
+      numer = "53",
+      mieszkancy = list(
+        osoba1 = list(
+          nazwisko = "Kowalski",
+          imie = "Jan"
+        ),
+        osoba2 = list(
+          nazwisko = "Kowalska",
+          imie = "Anna"
+        )
+      )
+    ),
+    adres2 = list(
+      ulica = "Towarowa",
+      numer = "54",
+      mieszkancy = list(
+        osoba1 = list(
+          nazwisko = "Nowak",
+          imie = "Anna"
+        )
+      )
+    )
+  )
+```
+
+Wyodrębnij imię osoby z drugiego adresu
+
+```{r}
+lista2[[2]][[3]][[1]][[2]]
+```
+
+Wczytaj dane z pliku drzewa.json i przekształć je na ramkę danych zawierającą informację o drzewach.
+
+```{r}
+drzewa_json <- 
+  read_json("dane-surowe/drzewa.json")
+```
+
+```{r}
+drzewa_df <-
+  drzewa_json |>
+  pluck("results") |>
+  tibble() |>
+  set_names("results") |>
+  unnest_wider(results)
+```
+
+Wczytaj dane z pliku season_stats.json.
+
+```{r}
+season_json <- 
+  read_json("dane-surowe/season_stats.json")
+```
+
+```{r}
+
+```
+

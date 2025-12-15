@@ -1,0 +1,181 @@
+
+## Pakiety
+
+```{r}
+library(readxl)
+library(dplyr)
+library(purrr)
+library(stringr)
+library(janitor)
+library(tidyr)
+```
+
+
+## Usuwanie obiektów
+
+```{r}
+remove(list = ls())
+```
+
+
+## Importowanie danych
+
+
+Wczytaj dane z pliku rent-poznan-multiple.xlsx
+
+```{r}
+nazwy_arkuszy <- 
+  excel_sheets("dane-surowe/rent-poznan-multiple.xlsx")
+
+rent_poznan <- 
+  lapply(nazwy_arkuszy, read_xlsx, path = "dane-surowe/rent-poznan-multiple.xlsx") |>
+  set_names(nazwy_arkuszy) |>
+  bind_rows(.id = "quarter")
+
+rent_poznan
+```
+
+
+Wczytaj dane z pliku rent-poznan-multiple.zip
+
+```{r}
+unzip("dane-surowe/rent-poznan-multiple.zip", exdir = "dane-surowe")
+```
+
+```{r}
+pliki <- 
+  list.files(path = "dane-surowe/rent-poznan-multiple/", full.names = TRUE)
+
+rent_poznan <- 
+  lapply(pliki, read_xlsx) |>
+  set_names(pliki) |>
+  bind_rows(.id = "quarter") |>
+  mutate(quarter = str_split_i(quarter, pattern = "/", i = -1)) |>
+  mutate(quarter = str_remove(quarter, pattern = "\\.xlsx"))
+
+rent_poznan
+```
+
+
+Wczytaj dane z pliku rynek-pracy-1.xlsx
+
+```{r}
+
+
+rynek_pracy <- 
+  read_xlsx("dane-surowe/rynek-pracy-1.xlsx") |>
+  clean_names()
+
+rynek_pracy <-
+  rynek_pracy |>
+  mutate(czy_rok = str_length(kod_wojewodztwa) == 4) |>
+  mutate(rok = ifelse(czy_rok, kod_wojewodztwa, NA), .before = 1) |>
+  mutate(rok = as.integer(rok)) |>
+  fill(rok) |>
+  filter(!czy_rok) |>
+  select(-czy_rok)
+
+rynek_pracy
+```
+
+
+Wczytaj dane z pliku rynek-pracy-2.xlsx.
+
+```{r}
+
+```
+
+
+Wczytaj dane z pliku rynek-pracy-3.xlsx
+
+```{r}
+dane <- 
+    read_xlsx("dane-surowe/rynek-pracy-3.xlsx", col_names = FALSE)
+
+nazwy_kolumn <- 
+  dane[1, ] |> as.character()
+
+puste_wiersze <- 
+  apply(dane, 1, \(x) all(is.na(x)))
+
+dane %>%
+  mutate(grupa = cumsum(puste_wiersze)) %>%
+  filter(!puste_wiersze) %>%
+  group_split(grupa) |>
+  lapply(\(df) slice(df, -1)) |>
+  bind_rows() |>
+  select(seq_along(nazwy_kolumn)) |>
+  set_names(nazwy_kolumn)
+
+dane
+
+```
+
+
+
+## Dodatek: lapply
+
+Wyznacz pierwiastki kwadratowe liczb z wektora 1:3
+
+```{r}
+lapply(1:3, sqrt) # wynik jest w postaci listy
+
+# nie jest to optymalne rozwiązanie, funkcję sqrt można zastosować bezpośrednio na wektorze
+
+sqrt(1:3)
+```
+
+Wyznacz logarytmy o podstawie 3 liczb wektora 1:3
+
+```{r}
+lapply(1:3, log, base = 3)
+```
+
+```{r}
+lapply(1:3, function(x) log(x, base = 3))
+```
+
+```{r}
+lapply(1:3, \(x) log(x, base = 3))
+```
+
+```{r}
+log3 <- function(x) log(x, base = 3)
+lapply(1:3, log3)
+```
+
+Wyznacz długości wektorów w obiekcie lista_z_wektorami
+
+```{r}
+lista_z_wektorami <- list(1:3, 1:10, 1:100)
+lapply(lista_z_wektorami, length)
+```
+Jakie są klasy kolumn w obiekce ramka_danych?
+
+```{r}
+ramka_danych <- data.frame(a = 1:3, b = letters[1:3], c = c(TRUE, FALSE, TRUE))
+
+lapply(ramka_danych, class)
+```
+
+Wykonaj sumulację:
+- wygeneruj 100 elementowe wektory x i y z rozkładu normalnego standaryzowanego
+- zbuduj model regresji liniowej y ~ x
+- niech wynikiem pojedyńczego kroku będzie współczynnik kierunkowy
+- powtórz powyższe kroki 100 razy
+
+```{r}
+set.seed(123) # ziarno liczb pseudolosowych, dla powtarzalności wyników
+
+symulacja <- 
+  lapply(1:100, function(i) {
+    x <- rnorm(100)
+    y <- rnorm(100)
+    model <- lm(y ~ x)
+    a <- model$coefficients[2]
+    return(a)
+  })
+
+symulacja |> unlist() |> unname() |> hist()
+```
+

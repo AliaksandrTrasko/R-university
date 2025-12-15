@@ -1,0 +1,108 @@
+---
+title: "Przekształcanie zbiorów danych"
+format: html
+editor: visual
+---
+
+Wczytaj potrzebne pakiety
+
+```{r}
+library(tidyr)
+library(dplyr)
+```
+
+Usuń wszystkie obiekty
+
+```{r}
+remove(list = ls())
+```
+
+Wczytaj dane z pliku aktywni.RData.
+
+```{r}
+load("dane-surowe/aktywni.RData")
+```
+
+Usuń wiersze z brakami danych
+
+```{r}
+drop_na(aktywni_01)
+aktywni_01 |> drop_na()
+```
+
+Rozszerz zbiór o brakujące przekroje rok x kwartal x plec x wiek.
+
+```{r}
+aktywni_02 |> complete(rok, kwartal, plec, wiek)
+```
+
+Uzupełnij brakujące wartości w kolumnach rok, kwartal, plec.
+
+```{r}
+aktywni_03 |> fill(rok, kwartal, plec)
+```
+
+Podziel kolumnę plec_wiek na plec i wiek.
+
+```{r}
+aktywni_04 |> 
+  separate_wider_delim(cols = plec_wiek, delim = " ", names = c("plec", "wiek"))
+```
+
+Podziel kolumnę okres na rok i kwartał
+
+```{r}
+aktywni_04 |> 
+  separate_wider_delim(cols = okres, delim = " Q", names = c("rok", "kwartal")) |>
+  mutate(rok = as.integer(rok), kwartal = as.integer(kwartal))
+```
+
+Wartości w kolumnnie wiek_liczba podziel na osobne wiersze, a następnie podziel tę kolumnę na dwie kolumny: wiek i liczba.
+
+```{r}
+aktywni_05 |> 
+  separate_longer_delim(wiek_liczba, delim = "; ") |>
+  separate_wider_delim(wiek_liczba, delim = ": ", names = c("wiek", "liczba")) |>
+  mutate(liczba = as.integer(liczba))
+```
+
+Zaprezentuj liczby osób aktywnwych w jedenj kolumnie liczba.
+
+```{r}
+aktywni_06 |> 
+  pivot_longer(cols = "25-34":"55-64", names_to = "wiek", values_to = "liczba")
+```
+
+Zaprezentuj liczbę osób aktywnych w jednej kolumnie. Kwartał przekonwertuj do liczby całkowitej.
+
+```{r}
+aktywni_07 |>
+  pivot_longer(cols = Q1:Q4, names_to = "kwartal", names_prefix = "Q", names_transform = as.integer, values_to = "liczba")
+```
+
+Zaprezentuj liczby osób aktywnych w jednej kolumnie. Rok i kwartał jako liczby całkowite zaprezentuj w dwóch osobnych kolumnach.
+
+```{r}
+aktywni_08 |> 
+  pivot_longer(cols = starts_with("20"), names_sep = " Q", names_to = c("rok", "kwartal"), names_transform = as.integer, values_to = "liczba")
+```
+
+Zaprezentuj liczby i stopy w dwóćh osobnych kolumnach.
+
+```{r}
+aktywni_09 |> 
+  pivot_longer(cols = contains(":"), names_sep = ": ", names_to = c(".value", "wiek"))
+```
+
+Zaprezentuj liczby i stopy w dwóch osobnych kolumnach, podobnie rok i kwartał niech będą w dwóch osobnych kolumnach.
+
+```{r}
+aktywni_10 |> 
+  pivot_longer(cols = starts_with("20"), names_sep = "_", names_to = c("rok", "kwartal", ".value"), names_transform = list(rok = as.integer, kwartal = as.integer))
+```
+
+Kolumnę wartosc zamień na dwie kolumny liczba i stopa.
+
+```{r}
+aktywni_11 |> pivot_wider(names_from = wskaznik, values_from = wartosc)
+```

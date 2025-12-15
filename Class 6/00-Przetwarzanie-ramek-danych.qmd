@@ -1,0 +1,247 @@
+---
+title: "Przetwarzanie danych"
+format: html
+editor: visual
+---
+
+## Pakiety
+
+```{r}
+library("readxl")
+library("dplyr")
+```
+
+## Importowanie danych
+
+```{r}
+gospodarstwa <- read_excel("dane-surowe/gospodarstwa.xlsx")
+gospodarstwa2 <- read_excel("dane-surowe/gospodarstwa.xlsx", sheet = "dane2")
+warianty <- read_excel("dane-surowe/gospodarstwa.xlsx", sheet = "warianty")
+```
+
+## Wybieranie wierszy
+
+Wybierz gospodarstwa z województwa wielkopolskiego (woj: 30).
+
+```{r}
+filter(gospodarstwa, woj == "30")
+gospodarstwa %>% filter(woj == "30")
+gospodarstwa |> filter(woj == "30")
+gospodarstwa_30 <- gospodarstwa |> filter(woj == "30")
+```
+
+Wybierz gospodarstwa z Poznania (woj: 30, klm: 1).
+
+```{r}
+gospodarstwa |> filter(woj == "30", klm == 1)
+```
+
+Wybierz gospodarstwa z województwa wielkopolskiego i mazowieckiego (woj: 30, 14).
+
+```{r}
+gospodarstwa |> filter(woj == "30" | woj == "14")
+gospodarstwa |> filter(woj %in% c("30", "14"))
+```
+
+Wybierz 10 gospodarstw o największych dochodach.
+
+```{r}
+gospodarstwa |> slice_max(order_by = dochg, n = 10)
+```
+
+Z każdego województwa wybierz gospodarstwo o najmniejszych dochodach.
+
+```{r}
+gospodarstwa |> slice_min(order_by = dochg, by = woj, n = 1)
+```
+
+Z każdego wojewóztwa wybierz pierwsze gospodarstwo.
+
+```{r}
+gospodarstwa |> slice_head(n = 1, by = woj)
+```
+
+## Wybieranie kolumn
+
+Wybierz kolumny woj, klm, dochg, wydg.
+
+```{r}
+gospodarstwa |> select(woj, klm, dochg, wydg)
+```
+
+Wybierz kolumny od woj do zut.
+
+```{r}
+gospodarstwa |> select(woj:zut)
+```
+
+Usuń kolumny dochg, wydg.
+
+```{r}
+gospodarstwa |> select(-dochg, -wydg)
+```
+
+Wybierz kolumny rozpoczynające się na literę "d".
+
+```{r}
+gospodarstwa |> select(starts_with("d"))
+```
+
+Wybierz kolumny o typie character.
+
+```{r}
+gospodarstwa |> select(where(is.character))
+```
+
+## Zmiana pozycji kolumn
+
+Przenieś kolumnę woj na pierwszą pozycję.
+
+```{r}
+gospodarstwa |> relocate(woj, .before = 1)
+```
+
+Przenieś kolumny dochg, wydg za kolumnę d63.
+
+## Tworzenie i modyfikowanie kolumn
+
+Utwórz zmienną saldo jako różnicę dochodów i wydatków.
+
+```{r}
+gospodarstwa |> mutate(saldo = dochg - wydg)
+gospodarstwa |> transmute(saldo = dochg - wydg)
+```
+
+Zmień typ kolumny klm na character oraz typ kolumny los na integer.
+
+```{r}
+gospodarstwa |> mutate(klm = as.character(klm), los = as.integer(los))
+```
+
+Utwórz zmienną sytuacja_materialna poprzez przekodowanie zmiennej d61: 1, 2 -\> "dobra", 3 -\> "przeciętna", 4, 5 -\> "zła"
+
+```{r}
+gospodarstwa |> mutate(sytuacja_materialna = case_match(d61, 1:2 ~ "dobra", 3 ~ "przeciętna", 4:5 ~ "zła"))
+```
+
+Wyznacz logarytmy z kolumny dochg i wydg.
+
+```{r}
+gospodarstwa |> transmute(dochg_log = log(dochg), wydg_log = log(wydg))
+
+gospodarstwa |> transmute(across(c(dochg, wydg), log, .names = "{.col}_log"))
+```
+
+Zamień typ kolumn rozpoczynających się na literę "d" na "numeric", pomiń kolumnę dochg.
+
+## Sortowanie
+
+Posortuj zbiór rosnącą wg dochg.
+
+```{r}
+gospodarstwa |> arrange(dochg)
+```
+
+Posortój zbiór rosnąco wg województw (woj), a w ramach wojewóztw malejąco wg dochodów (dochg).
+
+```{r}
+gospodarstwa |> arrange(woj, desc(dochg))
+```
+
+## Agregowanie
+
+Wyznacz liczbę gospodarstw w podziale na województwo (woj) i klasę miejscowości (klm).
+
+```{r}
+gospodarstwa |> count(woj, klm)
+```
+
+Wyznacz średnie dochody (dochg) i wdatki (wydg).
+
+```{r}
+gospodarstwa |> summarise(dochg_avg = mean(dochg), wydg_avg = mean(wydg))
+```
+
+Wyznacz średnie dochody (dochg) i wdatki (wydg) w podziale na województwa.
+
+```{r}
+gospodarstwa |> 
+  group_by(woj) |> 
+  summarise(dochg_avg = mean(dochg), wydg_avg = mean(wydg))
+
+gospodarstwa |> 
+  summarise(dochg_avg = mean(dochg), wydg_avg = mean(wydg), .by = woj)
+```
+
+Wyznacz współczynniki korelacji liniowej pomiędzy dochg a wydg w podziale na województwa.
+
+Wyznacz odsetek gospodarstw ze wsi w podziale na województwa.
+
+```{r}
+summarise(gospodarstwa, f = sum(klm == 6)/n(), .by = woj)
+
+gospodarstwa |>
+  summarise(f = sum(klm == 6)/n(), .by = woj)
+```
+
+Wyznacz średnią i medianę dochodów (dochg) i wydatków (wydg) gospodarstw w podziale na liczbę osób w gospodarstwie (los).
+
+## Łączenie zbiorów danych
+
+Do zbioru gospodarstwa dołącz kolumny ze zbioru gospodarstwa2.
+
+```{r}
+left_join(gospodarstwa, gospodarstwa2, by = "id")
+gospodarstwa |> left_join(gospodarstwa2, by = "id")
+```
+
+Dołącz kolumny ze zbioru gospodarstwa do zbioru gospodarstwa2.
+
+Połącz zbiory gospodarstwa i gospodarstwa2, pozostaw tylko te gospodarstwa, które występują w obu zbiorach.
+
+Połącz zbiory gospodarstwa i gospodarstwa2, pozostaw wszystkie gospodarstwa.
+
+## Przetwarzanie potokowe
+
+Wybierz gospodarstwa z województwa śląskiego (woj: 24). Usuń kolumny od zut do d63. Posortuj zbiór wg klm.
+
+```{r}
+arrange(select(filter(gospodarstwa, woj == 24), -(zut:d63)), klm)
+```
+
+```{r}
+gospodarstwa_24 <- filter(gospodarstwa, woj == 24)
+gospodarstwa_24 <- select(gospodarstwa_24, -(zut:d63))
+gospodarstwa_24 <- arrange(gospodarstwa_24, klm)
+gospodarstwa_24
+```
+
+```{r}
+gospodarstwa_24 <-
+  gospodarstwa |>
+  filter(woj == 24) |>
+  select(-(zut:d63)) |>
+  arrange(klm)
+```
+
+Dołącz do zbioru gospodarstwa nazwy województw ze zbioru warianty.
+
+```{r}
+warianty |>
+  filter(zmienna == "woj") |>
+  select(woj = wariant, woj_nazwa = etykieta) |>
+  right_join(gospodarstwa, by = "woj")
+```
+
+Wyznacz średnie dochody wg województw. Posortuj województwa malejąco wg średniego dochodu gospodarstwa.
+
+Dla każdego województwa wyznacz odsetek gospodarstw wyposażonych w gaz.
+
+Dla każdego województwa wyznacz przeciętne dochody i wydatki w podziale na miasto/wies.
+
+```{r}
+gospodarstwa |> 
+  mutate(miasto_wies = ifelse(klm == 6, "wieś", "miasto")) |>
+  summarise(przecietne_dochody = mean(dochg), przecietne_wydatki = mean(wydg), .by = c(woj, miasto_wies)) |>
+  arrange(woj, miasto_wies)
+```

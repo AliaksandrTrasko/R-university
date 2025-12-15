@@ -1,0 +1,271 @@
+Wczytaj potrzebne pakiety
+
+```{r}
+library(stringr)
+library(readxl)
+library(dplyr)
+```
+
+Usuń wszystkie obiekty
+
+```{r}
+remove(list = ls())
+```
+
+Wytnij nazwę ulicy
+
+```{r}
+x <- c("ul. Winogrady", "ul. Wyzwolenia", "ul. Szymanowskiego", "ul. Małe Garbary")
+
+str_sub(x, start = 5, end = -1)
+```
+
+Sklej teksty, tak aby w wyniku otrzymać: "ul. Winogrady 10" ...
+
+```{r}
+x <- c("Winogrady", "Wyzwolenia", "Szymanowskiego", "Małe Garbary")
+y <- c(10, NA, 30, 40)
+```
+
+```{r}
+paste("ul.", x, y)
+```
+
+```{r}
+str_c("ul.", x, y, sep = " ")
+```
+
+Wyodrębnij domenę poczty z adresu e-mail.
+
+```{r}
+x <- c("abcd@gmail.com", "efg.hij@yahoo.com", "klmno@o2.pl", "pqrstuvwxyz@gmail.com")
+```
+
+```{r}
+str_split_i(x, pattern = "@", i = 2)
+```
+
+Usuń nadmiarowe spacje.
+
+```{r}
+x <- c(" Winogrady", "Wyzwolenia ", " Szymanowskiego ", "Małe Garbary")
+```
+
+```{r}
+str_trim(x)
+```
+
+```{r}
+x <- c(" Winogrady", "Wyzwolenia ", " Szymanowskiego ", "Małe  Garbary")
+```
+
+```{r}
+str_squish(x)
+```
+
+Posortuj teksty
+
+```{r}
+x <- c("9", "54", "876", "3210")
+```
+
+```{r}
+str_sort(x)
+```
+
+```{r}
+str_sort(x, numeric = TRUE)
+```
+
+
+Uzupełnij zerami z przodu, tak aby wszystkie teksty miały długość 4.
+
+```{r}
+x <- c("9", "54", "876", "3210")
+```
+
+```{r}
+str_pad(x, width = 4, pad = "0")
+```
+
+
+Zamień wielkie litery na małe.
+
+```{r}
+x <- c("WINOGRADY", "Wyzwolenia", "Szymanowskiego", "Małe Garbary")
+```
+
+```{r}
+str_to_lower(x)
+```
+
+
+Zamień "," na ".".
+
+```{r}
+x <- c("30,1", "40,4", "49,8", "60,3")
+```
+
+```{r}
+as.numeric(x)
+```
+
+```{r}
+str_replace(x, pattern = ",", replacement = ".")
+```
+
+```{r}
+x |> str_replace(",", ".") |> as.numeric()
+```
+
+```{r}
+x <- c("800,000 PLN", "1,000,000 PLN", "1,200,000 PLN", "1,500,000 PLN")
+```
+
+```{r}
+str_replace(x, ",", " ")
+```
+```{r}
+str_replace_all(x, ",", " ")
+```
+
+
+Zamień "." na ",".
+
+```{r}
+x <- c("30.1", "40.4", "49.8", "60.3")
+```
+
+```{r}
+str_replace(x, ".", ",")
+```
+
+```{r}
+str_replace_all(x, ".", ",")
+```
+
+```{r}
+str_replace(x, "\\.", ",")
+```
+
+```{r}
+str_replace(x, fixed("."), ",")
+```
+
+
+Wskaż, który tekst zawiera tekst "garaż".
+
+```{r}
+x <- c("Przytulna kawalerka 30mkw garaż Winogrady", "Kawalerka 40m2 Rataje BEZPOSREDNIO", "Mieszkanie dwupokojowe 50 mkw z garażem PIĄTKOWO", "Mieszkanie dwu-pokojowe 60 m2 Stare Miasto")
+```
+
+```{r}
+str_detect(x, pattern = "garaż")
+```
+
+
+Wskaż, które teksty zawierają tekst "garaż" lub "parking".
+
+```{r}
+x <- c("Przytulna kawalerka 30mkw GARAŻ Winogrady", "Kawalerka 40m2 Rataje BEZPOSREDNIO", "Mieszkanie dwupokojowe 50 mkw z miejscem parkingowym PIĄTKOWO", "Mieszkanie dwu-pokojowe 60 m2 Stare Miasto")
+```
+
+```{r}
+str_detect(x, pattern = "garaż|parking")
+```
+
+```{r}
+str_detect(x, pattern = "garaż|GARAŻ|Garaż|parking|PARKING|Parking")
+```
+
+```{r}
+str_detect(str_to_lower(x), pattern = "garaż|parking")
+```
+
+```{r}
+str_detect(x, pattern = regex("garaż|parking", ignore_case = FALSE))
+```
+
+```{r}
+str_detect(x, pattern = fixed("garaż|parking"))
+```
+
+
+Wyodrębnij powierzchnie mieszkania (dwucyfrowe ciągi znaków).
+
+```{r}
+x <- c("Przytulna kawalerka 30 mkw GARAŻ Winogrady", "Kawalerka Rataje BEZPOSREDNIO", "Mieszkanie dwupokojowe 50 mkw z miejscem parkingowym PIĄTKOWO", "Mieszkanie dwu-pokojowe 60 mkw Stare Miasto")
+```
+
+```{r}
+str_extract(x, pattern = "\\d\\d")
+```
+
+
+Wczytaj dane z pliku "rent-poznan.xlsx".
+
+```{r}
+rent <- 
+  read_excel("dane-surowe/rent-poznan.xlsx") |>
+  select(ad_title, flat_area, flat_rooms, flat_garage)
+
+rent
+```
+
+Znajdź ogłoszenia w których występuje słowo: "garaż", "parking" lub "postojowe".
+
+```{r}
+rent |> 
+  filter(str_detect(ad_title, regex("garaż|parking|postojowe", ignore_case = TRUE)))
+```
+
+Znajdź ogłoszenia w których znajduje się tekst z wektora x.
+
+```{r}
+x <- c("garaż", "garaz", "gararz", "parking", "postoj")
+str_c(x, collapse = "|")
+
+
+rent |> 
+  filter(str_detect(ad_title, str_c(x, collapse = "|")))
+```
+
+Wyodrębnij powierzchnie mieszkania jako tekst składający się od dwóch do trzech cyfr a następnie opcjonalnie spacja oraz skrót "m2" lub "mkw", np. "30m2", "40 m2", "50mkw", "50 mkw".
+
+```{r}
+rent |>
+  mutate(pow = str_extract(ad_title, pattern = "\\d\\d( )?(m2|mkw)"), .after = ad_title) |>
+  filter(!is.na(pow))
+```
+
+```{r}
+rent |>
+  mutate(pow = str_extract(ad_title, pattern = "\\d{2,3}( )?(m2|mkw)"), .after = ad_title) |>
+  filter(!is.na(pow))
+```
+
+Uwzględnij w poprzednim zadaniu miejsca dziesiętne w liczbie.
+
+```{r}
+rent |>
+  mutate(pow = str_extract(ad_title, pattern = "\\d{2,3}((.|,)\\d{1,2})?( )?(m2|mkw)"), .after = ad_title) |>
+  filter(!is.na(pow))
+```
+
+W poprzednim zadaniu pozostaw tylko liczbę.
+
+```{r}
+
+```
+
+Znajdź ogłoszenia, w któych co najmniej dwukrotnie występuje liczba dwu/trzy-cyfrowa.
+
+```{r}
+
+```
+
+Znajdź ogłoszenia, w któych co najmniej dwukrotnie występuje ten sam ciąg kolejnych 8 znaków (liter lub cyfr).
+
+```{r}
+
+```
